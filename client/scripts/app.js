@@ -1,8 +1,10 @@
-$(document).ready( function(){
+  $(document).ready( function(){
 
   var messages = [];
   var rooms = {};
-  var baseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
+  // var baseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
+  var baseURL = 'http://127.0.0.1:8080';
+
   var parseURL = baseURL;
 
 // Toggles the disabled attribute of the send button upon text entry into draft

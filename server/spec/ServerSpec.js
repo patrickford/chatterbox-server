@@ -1,4 +1,4 @@
-var handler = require("../request-handler");
+  var handler = require("../request-handler");
 
 function StubRequest(url, method, postdata) {
   this.url = url;
