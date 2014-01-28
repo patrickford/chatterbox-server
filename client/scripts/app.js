@@ -3,7 +3,8 @@
   var messages = [];
   var rooms = {};
   // var baseURL = 'https://api.parse.com/1/classes/chatterbox?order=-createdAt';
-  var baseURL = 'http://127.0.0.1:8080';
+  // var baseURL = 'http://127.0.0.1:8080/classes/room1';
+  var baseURL = 'http://127.0.0.1:8080/classes/room1';
 
   var parseURL = baseURL;
 
@@ -85,7 +86,7 @@
 
   var selectRoom = function(){
     if ($('#rooms').val() === "All Rooms") {
-      parseURL = baseURL;
+      parseURL = baseURL + "/classes/room1";
     } else {
       var theRoom = $('#rooms').val();
       parseURL = baseURL + '&where={"roomname"'+':' + '"'+theRoom+ '"}';
@@ -106,7 +107,7 @@
     messageObj.username = username;
     messageObj.text = message;
     messageObj.roomname = $('#rooms').val();
-
+console.log(parseURL);
     $.ajax({
       url: parseURL,
       type: 'POST',
@@ -128,8 +129,9 @@
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
+        console.log(data.results);
         messages = data.results;
-        getRoomnames();
+        // getRoomnames();
         drawMessages();
       }
     });
@@ -138,5 +140,5 @@
   getMessages();
   setInterval(function(){
     getMessages();
-  },2000);
+  },10000);
 });

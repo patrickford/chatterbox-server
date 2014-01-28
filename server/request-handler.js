@@ -7,6 +7,7 @@
 var responseData = [];
 var url = require('url');
 
+
 exports.handleRequest = function(request, response) {
   //var requestURL = url.parse(request.url, [true],[true]);
   /* the 'request' argument comes from nodes http module. It includes info about the
@@ -21,38 +22,55 @@ exports.handleRequest = function(request, response) {
 
   // var responseData = [];
   var statusCode;
-  var testExample = {username: "Jono",
-                     message: "Do my bidding!"};
 
-  if(request.method === 'GET') {
-    if (urlObj.path === '/classes/room1') {
-      statusCode = 200;
-    } else
-    {
-      statusCode = 404;
-    }
-  }
-  if(request.method === 'POST'){
-    statusCode = 201;
-    // console.log(JSON.parse(request.data));
-    // responseData.push(JSON.parse(request.data));
-    responseData.push(JSON.parse(request.data));
-
-  }
   /* Without this line, this server wouldn't work. See the note
    * below about CORS. */
   var headers = defaultCorsHeaders;
-
   headers['Content-Type'] = "text/plain";
 
+  if(request.method === 'OPTIONS') {
+    //debugger;
+    statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
+
+  if(request.method === 'GET') {
+    if (urlObj.path === '/classes/room1') {
+      request.on('end', function(){
+        statusCode = 200;
+        response.writeHead(statusCode, headers);
+        response.end(JSON.stringify(responseData));
+      });
+    } else
+    {
+      statusCode = 404;
+      response.writeHead(statusCode, headers);
+      response.end();
+    }
+  }
+
+  if(request.method === 'POST'){
+    // Add validation of properly formatted messageObj
+    request.on('end', function(){
+      console.log(request._postData);
+      responseData.push(request._postData);
+
+      statusCode = 201;
+      response.writeHead(statusCode, headers);
+      response.end();
+    });
+  }
+
+
   /* .writeHead() tells our server what HTTP status code to send back */
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   /* Make sure to always call response.end() - Node will not send
    * anything back to the client until you do. The string you pass to
    * response.end() will be the body of the response - i.e. what shows
    * up in the browser.*/
-  response.end(JSON.stringify(responseData));
+  // response.end(JSON.stringify(responseData));
 };
 
 /* These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -63,6 +81,6 @@ exports.handleRequest = function(request, response) {
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept",
+  "access-control-allow-headers": "content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key",
   "access-control-max-age": 10 // Seconds.
 };
