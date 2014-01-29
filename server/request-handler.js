@@ -4,10 +4,11 @@
  * You'll have to figure out a way to export this function from
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
-var responseData = [
-  {text: 'hello', username: 'peter'}
-];
+// var responseData = [
+//   {text: 'hello', username: 'peter'}
+// ];
 var url = require('url');
+var fs = require('fs');
 
 var headers = {
   "access-control-allow-origin": "*",
@@ -19,8 +20,6 @@ var headers = {
 
 var handleRequest = function(request, response) {
 
-  /* Documentation for both request and response can be found at
-   * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
   var urlObj = url.parse(request.url, null, true);
 
   console.log("Serving request type " + request.method + " for url " + request.url);
@@ -37,9 +36,12 @@ var handleRequest = function(request, response) {
   if(request.method === 'GET') {
     if (urlObj.path === '/classes/room1' || urlObj.path === '/classes/messages') {
       request.on('end', function(){
+        var contents = JSON.parse('[' + fs.readFileSync('messages.txt','utf8') + ']');
+        var reversed = contents.reverse();
         statusCode = 200;
         response.writeHead(statusCode, headers);
-        response.end(JSON.stringify({results: responseData}));
+        // response.end(JSON.stringify({results: responseData}));
+        response.end(JSON.stringify({results: reversed}));
       });
     } else
     {
@@ -56,13 +58,21 @@ var handleRequest = function(request, response) {
     });
 
     request.on('end', function(){
-      responseData.unshift(JSON.parse(requestString));
+      //responseData.unshift(JSON.parse(requestString));
+      fs.open('messages.txt', 'a', 666, function( e, id ) {
+        console.log(fs.readFileSync('messages.txt','utf8'));
+        fs.write( id, ',' + requestString, null, 'utf8', function(){
+          fs.close(id, function(){
+            console.log('file closed');
+          });
+        });
+      });
+
       statusCode = 201;
       response.writeHead(statusCode, headers);
-      response.end();
+      response.end('{}');
     });
   }
-
 };
 
 module.exports.handleRequest = handleRequest;

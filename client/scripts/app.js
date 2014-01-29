@@ -49,7 +49,7 @@
   };
 
   //on pressing enter
-  
+
 
   var getRoomnames = function(){
     for (var i = 0; i < messages.length; i++) {
@@ -105,12 +105,15 @@
     $.ajax({
       url: 'http://127.0.0.1:8080/classes/room1',
       type: 'GET',
+      dataType: 'json',
       contentType: 'application/json',
       success: function(data){
-        console.log(data.results);
         messages = data.results;
         // getRoomnames();
         drawMessages();
+      },
+      error: function(data) {
+        console.error('Chatterbox: Failed to GET message');
       }
     });
   };
@@ -145,5 +148,5 @@ $(document).ready( function(){
   getMessages();
   setInterval(function(){
     getMessages();
-  },10000);
+  },2000);
 });
