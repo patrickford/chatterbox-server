@@ -4,14 +4,20 @@
  * You'll have to figure out a way to export this function from
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
-var responseData = [];
+var responseData = [
+  {text: 'hello', username: 'peter'}
+];
 var url = require('url');
 
+var headers = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10, // Seconds.
+  "Content-Type": "application/json"
+};
 
-exports.handleRequest = function(request, response) {
-  //var requestURL = url.parse(request.url, [true],[true]);
-  /* the 'request' argument comes from nodes http module. It includes info about the
-  request - such as what URL the browser is requesting. */
+var handleRequest = function(request, response) {
 
   /* Documentation for both request and response can be found at
    * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
@@ -20,27 +26,20 @@ exports.handleRequest = function(request, response) {
   console.log("Serving request type " + request.method + " for url " + request.url);
   console.log(urlObj.pathname);
 
-  // var responseData = [];
-  var statusCode;
-
-  /* Without this line, this server wouldn't work. See the note
-   * below about CORS. */
-  var headers = defaultCorsHeaders;
-  headers['Content-Type'] = "text/plain";
+  var statusCode = 404;
 
   if(request.method === 'OPTIONS') {
-    //debugger;
     statusCode = 200;
     response.writeHead(statusCode, headers);
     response.end();
   }
 
   if(request.method === 'GET') {
-    if (urlObj.path === '/classes/room1') {
+    if (urlObj.path === '/classes/room1' || urlObj.path === '/classes/messages') {
       request.on('end', function(){
         statusCode = 200;
         response.writeHead(statusCode, headers);
-        response.end(JSON.stringify(responseData));
+        response.end(JSON.stringify({results: responseData}));
       });
     } else
     {
@@ -51,36 +50,19 @@ exports.handleRequest = function(request, response) {
   }
 
   if(request.method === 'POST'){
-    // Add validation of properly formatted messageObj
-    request.on('end', function(){
-      console.log(request._postData);
-      responseData.push(request._postData);
+    var requestString = '';
+    request.on('data', function(data){
+      requestString += data;
+    });
 
+    request.on('end', function(){
+      responseData.unshift(JSON.parse(requestString));
       statusCode = 201;
       response.writeHead(statusCode, headers);
       response.end();
     });
   }
 
-
-  /* .writeHead() tells our server what HTTP status code to send back */
-  // response.writeHead(statusCode, headers);
-
-  /* Make sure to always call response.end() - Node will not send
-   * anything back to the client until you do. The string you pass to
-   * response.end() will be the body of the response - i.e. what shows
-   * up in the browser.*/
-  // response.end(JSON.stringify(responseData));
 };
 
-/* These headers will allow Cross-Origin Resource Sharing (CORS).
- * This CRUCIAL code allows this server to talk to websites that
- * are on different domains. (Your chat client is running from a url
- * like file://your/chat/client/index.html, which is considered a
- * different domain.) */
-var defaultCorsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key",
-  "access-control-max-age": 10 // Seconds.
-};
+module.exports.handleRequest = handleRequest;

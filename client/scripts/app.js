@@ -1,4 +1,4 @@
-  $(document).ready( function(){
+
 
   var messages = [];
   var rooms = {};
@@ -33,7 +33,7 @@
     if(textVal.length>0){
       sendMessage(textVal);
       $('#draft').val('');
-      $('.send').attr('disabled', true);
+      //$('.send').attr('disabled', true);
     }
   };
 
@@ -49,30 +49,7 @@
   };
 
   //on pressing enter
-  $('#draft').keypress(function(Q){
-    if(Q.which == 13){
-      sendClearDisable();
-    }
-  });
-
-  $('#newRoom').keypress(function(Q){
-    if(Q.which == 13){
-      setRoomClearDisable();
-    }
-  });
-
-  //on button click
-  $('.send').click(function(){
-    sendClearDisable();
-  });
-
-  $('.createRoom').click(function(){
-    setRoomClearDisable();
-  });
-
-  $('form').on('change',function(){
-    selectRoom();
-  });
+  
 
   var getRoomnames = function(){
     for (var i = 0; i < messages.length; i++) {
@@ -107,7 +84,7 @@
     messageObj.username = username;
     messageObj.text = message;
     messageObj.roomname = $('#rooms').val();
-console.log(parseURL);
+
     $.ajax({
       url: parseURL,
       type: 'POST',
@@ -125,7 +102,8 @@ console.log(parseURL);
 
   var getMessages = function() {
     // var returnedMessages;
-    $.ajax(parseURL,{
+    $.ajax({
+      url: 'http://127.0.0.1:8080/classes/room1',
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
@@ -136,6 +114,33 @@ console.log(parseURL);
       }
     });
   };
+
+$(document).ready( function(){
+
+  $('#draft').keypress(function(Q){
+    if(Q.which == 13){
+      sendClearDisable();
+    }
+  });
+
+  $('#newRoom').keypress(function(Q){
+    if(Q.which == 13){
+      setRoomClearDisable();
+    }
+  });
+
+  //on button click
+  $('.send').click(function(){
+    sendClearDisable();
+  });
+
+  $('.createRoom').click(function(){
+    setRoomClearDisable();
+  });
+
+  $('form').on('change',function(){
+    selectRoom();
+  });
 
   getMessages();
   setInterval(function(){
